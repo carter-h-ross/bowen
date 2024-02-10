@@ -3,10 +3,28 @@ namespace SpriteKind {
     export const life = SpriteKind.create()
     export const kill = SpriteKind.create()
     export const portal = SpriteKind.create()
+    export const gamble = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.kill, function (sprite, otherSprite) {
     info.setLife(0)
     sprites.destroy(otherSprite)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.gamble, function (sprite, otherSprite) {
+    while (true) {
+        parlayLegs = game.askForNumber("\"how many legs of your bet do you want\"")
+        wager = game.askForNumber("How many  gems will you gamble?")
+        if (wager <= info.score()) {
+            if (Math.percentChance(50)) {
+                info.changeScoreBy(wager)
+                game.showLongText("you won " + wager + " gems, you now have: " + info.score() + "gems.", DialogLayout.Bottom)
+            } else {
+                info.changeScoreBy(0 - wager)
+                game.showLongText("you lost " + wager + " gems, you now have: " + info.score() + "gems.", DialogLayout.Bottom)
+                break;
+            }
+            sprites.destroy(otherSprite)
+        }
+    }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     Render.setViewMode(ViewMode.raycastingView)
@@ -150,7 +168,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     sprites.destroy(otherSprite)
     music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.UntilDone)
     info.changeScoreBy(1)
-    if (info.score() == 50) {
+    if (info.score() == 100) {
         game.gameOver(true)
     }
 })
@@ -161,6 +179,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
     tiles.placeOnRandomTile(otherSprite, assets.tile`myTile15`)
     music.play(music.melodyPlayable(music.bigCrash), music.PlaybackMode.UntilDone)
 })
+let wager = 0
+let parlayLegs = 0
+let CHANCEMAKER: Sprite = null
 let portal_gem: Sprite = null
 let kill_gem: Sprite = null
 let life_gem: Sprite = null
@@ -416,4 +437,25 @@ for (let index = 0; index < 10; index++) {
         . . . . . . d . . . . . . 
         `, SpriteKind.portal)
     tiles.placeOnRandomTile(portal_gem, assets.tile`myTile15`)
+}
+for (let index = 0; index < 10; index++) {
+    CHANCEMAKER = sprites.create(img`
+        . . . . . . 5 . . . . . . 
+        . . . . . 5 5 5 . . . . . 
+        . . . . 7 5 2 5 5 . . . . 
+        . . . 5 5 5 5 5 8 5 . . . 
+        . . 5 5 8 3 5 7 5 5 5 . . 
+        . . 5 5 2 5 5 5 3 2 5 . . 
+        . . 8 5 3 5 8 5 5 5 5 . . 
+        . . 5 5 5 5 5 7 5 7 5 . . 
+        . . 5 2 7 5 8 5 5 5 5 . . 
+        . . 5 5 5 5 5 5 8 2 5 . . 
+        . . 5 8 5 5 5 5 5 5 5 . . 
+        . . 5 5 5 2 5 5 3 5 5 . . 
+        . . . 5 3 5 5 5 7 5 . . . 
+        . . . . 5 5 5 8 5 . . . . 
+        . . . . . 5 5 5 . . . . . 
+        . . . . . . 5 . . . . . . 
+        `, SpriteKind.gamble)
+    tiles.placeOnRandomTile(CHANCEMAKER, assets.tile`myTile15`)
 }
